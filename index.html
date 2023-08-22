@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Document</title>
+    <script src="script.js"></script>
+
+    <style>
+        body {
+            margin: 0;
+            font-family: sans-serif;
+        }
+    </style>
+</head>
+<body>
+    <h1>Warning: Lower focal lengths break rendering</h1>
+    <canvas width="1920" height="900"></canvas>
+    Focal length: <input type="range" min="1" max="500" value="500" id="focalLengthSlider"/><b id="focalLengthLabel"></b>
+    <br/>
+    <button type="button" id="steadyButton">Steady</button>
+    <button type="button" id="xButton">X</button>
+    <button type="button" id="yButton">Y</button>
+    <button type="button" id="zButton">Z</button>
+</body>
+</html>

@@ -1,12 +1,25 @@
 "use strict";
 const vertices = [
-    [-1, -1, -1], [1, -1, -1], [1, 1, -1], [-1, 1, -1],
-    [-1, -1, 1], [1, -1, 1], [1, 1, 1], [-1, 1, 1]
-];
-const edges = [
-    [0, 1], [1, 2], [2, 3], [3, 0],
-    [4, 5], [5, 6], [6, 7], [7, 4],
-    [0, 4], [1, 5], [2, 6], [3, 7]
+    /*[-1, -1, -1], [1, -1 ,-1], [1, 1, -1], [-1, 1, -1],
+    [-1, -1, 1], [1, -1 , 1], [1, 1, 1], [-1, 1, 1]*/
+    // Front face
+    [-1, -1, -1], [-1, 1, -1], [1, -1, -1],
+    [-1, 1, -1], [1, 1, -1], [1, -1, -1],
+    // Back face
+    [-1, -1, 1], [-1, 1, 1], [1, -1, 1],
+    [-1, 1, 1], [1, 1, 1], [1, -1, 1],
+    // Left face
+    [-1, -1, -1], [-1, -1, 1], [-1, 1, -1],
+    [-1, 1, -1], [-1, 1, 1], [-1, -1, 1],
+    // Right face
+    [1, -1, -1], [1, -1, 1], [1, 1, -1],
+    [1, 1, -1], [1, 1, 1], [1, -1, 1],
+    // Up face
+    [-1, 1, -1], [-1, 1, 1], [1, 1, -1],
+    [1, 1, -1], [1, 1, 1], [-1, 1, 1],
+    // Down face
+    [-1, -1, -1], [-1, -1, 1], [1, -1, -1],
+    [1, -1, -1], [1, -1, 1], [-1, -1, 1]
 ];
 let globalFocalLength = 300;
 let globalAxis = '';
@@ -35,17 +48,23 @@ function getRotatedCoordinates(axis, x, y, z, angle) {
     }
     return [x, y, z];
 }
-function project(ctx, vertices, edges, focalLength, angle) {
+function drawTriangle(ctx, vertices, fillColor) {
+    ctx.fillStyle = fillColor;
+    ctx.beginPath();
+    ctx.moveTo(vertices[0][0], vertices[0][1]);
+    ctx.lineTo(vertices[1][0], vertices[1][1]);
+    ctx.lineTo(vertices[2][0], vertices[2][1]);
+    ctx.closePath();
+    ctx.stroke();
+    //ctx.fill()
+}
+function project(ctx, vertices, focalLength, angle) {
     ctx.fillStyle = "blue";
     let vertexProjectionMap = [];
-    let i = 0;
-    for (const vertex of vertices) {
-        let rotatedVertex;
+    for (let i = 0; i < vertices.length; i++) {
+        let rotatedVertex = vertices[i];
         if (globalAxis != "") {
-            rotatedVertex = getRotatedCoordinates(globalAxis, vertex[0], vertex[1], vertex[2], angle);
-        }
-        else {
-            rotatedVertex = vertex;
+            rotatedVertex = getRotatedCoordinates(globalAxis, vertices[i][0], vertices[i][1], vertices[i][2], angle);
         }
         const x = rotatedVertex[0] * 50;
         const y = rotatedVertex[1] * 50;
@@ -56,15 +75,14 @@ function project(ctx, vertices, edges, focalLength, angle) {
         ctx.beginPath();
         ctx.arc(projectedX + 500, projectedY + 200, 5, 0, 2 * Math.PI);
         ctx.fill();
-        i++;
     }
-    for (const edge of edges) {
-        const from = edge[0];
-        const to = edge[1];
-        ctx.beginPath();
-        ctx.moveTo(vertexProjectionMap[from][0], vertexProjectionMap[from][1]);
-        ctx.lineTo(vertexProjectionMap[to][0], vertexProjectionMap[to][1]);
-        ctx.stroke();
+    for (let i = 0; i < vertexProjectionMap.length; i += 3) {
+        const currentTriangle = [
+            [vertexProjectionMap[i][0], vertexProjectionMap[i][1], vertexProjectionMap[i][2]],
+            [vertexProjectionMap[i + 1][0], vertexProjectionMap[i + 1][1], vertexProjectionMap[i + 1][2]],
+            [vertexProjectionMap[i + 2][0], vertexProjectionMap[i + 2][1], vertexProjectionMap[i + 2][2]]
+        ];
+        drawTriangle(ctx, currentTriangle, "#f00");
     }
 }
 function start(focalLength, angle) {
@@ -72,9 +90,10 @@ function start(focalLength, angle) {
     const canvasEl = document.querySelector("canvas");
     const ctx = canvasEl.getContext("2d");
     initCanvas(canvasEl, ctx);
-    project(ctx, vertices, edges, focalLength, angle);
+    project(ctx, vertices, focalLength, angle);
     angle += 0.01;
     setTimeout(() => start(globalFocalLength, angle), 1 / 15);
+    //drawTriangle(ctx, [[100, 200], [400, 500], [300, 100]], "#f00")
 }
 window.onload = () => {
     const slider = document.querySelector("#focalLengthSlider");
@@ -100,5 +119,5 @@ window.onload = () => {
     steadyButton.onclick = () => {
         globalAxis = "";
     };
-    requestAnimationFrame(() => start(globalFocalLength, angle % 2 * Math.PI));
+    start(0, 0);
 };
